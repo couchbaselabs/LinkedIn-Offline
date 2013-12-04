@@ -9,9 +9,15 @@
 #import "MasterViewController.h"
 
 #import "DetailViewController.h"
+#import "LIALinkedInApplication.h"
+#import "LIALinkedInHttpClient.h"
+
+#define kAuthAgentServer @"https://www.linkedin.com"
+
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
+    LIALinkedInHttpClient *_client;
 }
 @end
 
@@ -28,11 +34,24 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
-//    self.navigationItem.leftBarButtonItem = self.editButtonItem;
+
 
 //    UIBarButtonItem *addButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(insertNewObject:)];
 //    self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
+    
+    
+    NSArray *grantedAccess = @[@"r_fullprofile", @"r_network", @"w_messages", @"r_emailaddress"];
+    
+    //load the the secret data from an uncommitted LIALinkedInClientExampleCredentials.h file
+    NSString *clientId = @"75pagpxz73rdcs"; //the client secret you get from the registered LinkedIn application
+    NSString *clientSecret = @"krsIJQtDU5cAZMO4"; //the client secret you get from the registered LinkedIn application
+    NSString *state = @"entropy8please34876tfgkshd7qieufg28734ythanks"; //A long unique string value of your choice that is hard to guess. Used to prevent CSRF
+    LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:@"http://mobile.couchbase.com" clientId:clientId clientSecret:clientSecret state:state grantedAccess:grantedAccess];
+    _client = [LIALinkedInHttpClient clientForApplication:application];
+    
+    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonSystemItemRefresh target:self action:@selector(didPressLogin:)];
+
 }
 
 - (void)didReceiveMemoryWarning
@@ -41,14 +60,41 @@
     // Dispose of any resources that can be recreated.
 }
 
-- (void)insertNewObject:(id)sender
+- (void)sendAccessTokenToAuthenticationAgent: (NSString *)accessToken {
+    LIALinkedInHttpClient *authAgentClient = [[LIALinkedInHttpClient alloc] initWithBaseURL:[NSURL URLWithString:kAuthAgentServer]];
+    [authAgentClient postPath:@"/access_token" parameters:@{@"access_token":accessToken} success:^(AFHTTPRequestOperation *operation, NSDictionary *userData) {
+        NSLog(@"Got userData %@ with accessToken %@", userData, error);
+//        success(userData);
+    }     failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"Setting new accessToken failed %@", error);
+    }];
+}
+
+- (void)didPressLogin:(id)sender
 {
-    if (!_objects) {
-        _objects = [[NSMutableArray alloc] init];
-    }
-    [_objects insertObject:[NSDate date] atIndex:0];
-    NSIndexPath *indexPath = [NSIndexPath indexPathForRow:0 inSection:0];
-    [self.tableView insertRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+    NSLog(@"didPressLogin");
+    
+    [_client getAuthorizationCode:^(NSString *code) {
+        [_client getAccessToken:code success:^(NSDictionary *accessTokenData) {
+            NSString *accessToken = [accessTokenData objectForKey:@"access_token"];
+            
+//            todo use the _client to discover email address can be done on the server
+            [self sendAccessTokenToAuthenticationAgent: accessToken];
+            
+            
+            [_client getPath:[NSString stringWithFormat:@"https://api.linkedin.com/v1/people/~?oauth2_access_token=%@&format=json", accessToken] parameters:nil success:^(AFHTTPRequestOperation *operation, NSDictionary *result) {
+                NSLog(@"current user %@", result);
+            }            failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+                NSLog(@"failed to fetch current user %@", error);
+            }];
+        }                   failure:^(NSError *error) {
+            NSLog(@"Quering accessToken failed %@", error);
+        }];
+    }                          cancel:^{
+        NSLog(@"Authorization was cancelled by user");
+    }                         failure:^(NSError *error) {
+        NSLog(@"Authorization failed %@", error);
+    }];
 }
 
 #pragma mark - Table View
