@@ -7,6 +7,8 @@
 //
 
 #import "AppDelegate.h"
+#import "AppSecretConfig.h"
+
 
 @implementation AppDelegate
 
@@ -16,9 +18,15 @@
     UISplitViewController *splitViewController = (UISplitViewController *)self.window.rootViewController;
     UINavigationController *navigationController = [splitViewController.viewControllers lastObject];
     splitViewController.delegate = (id)navigationController.topViewController;
+    
+    [self setupCBL];
+    [self setupCBLSync];
+
+    
     return YES;
 }
-							
+
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -45,5 +53,64 @@
 {
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
+
+
+#pragma mark - Public API to Trigger Login and Sync
+
+- (void)loginAndSync: (void (^)())complete {
+    if (_cblSync.userID) {
+        complete();
+    } else {
+        [_cblSync beforeFirstSync:^(NSString *userID, NSDictionary *userData, NSError **outError) {
+            complete();
+        }];
+        [_cblSync start];
+    }
+}
+
+#pragma mark - Setup Couchbase Lite and Linked-In Authentication
+
+- (void) setupCBL {
+    CBLManager *manager = [CBLManager sharedInstance];
+    NSError *error;
+    self.database = [manager databaseNamed: @"linkedin" error: &error];
+    if (error) {
+        NSLog(@"error getting database %@",error);
+        exit(-1);
+    }
+    
+}
+
+- (void) setupCBLSync {
+    _cblSync = [[CBLSyncManager alloc] initSyncForDatabase:_database withURL:[NSURL URLWithString:kSyncUrl]];
+    
+    // Tell the Sync Manager to use Facebook for login.
+    _cblSync.authenticator = [[CBLLinkedInAuth alloc] initWithAppID:kFBAppId];
+    
+    if (_cblSync.userID) {
+        //        we are logged in, go ahead and sync
+        [_cblSync start];
+    } else {
+        // Application callback to create the user profile.
+        // this will be triggered after we call [_cblSync start]
+        [_cblSync beforeFirstSync:^(NSString *userID, NSDictionary *userData,  NSError **outError) {
+            // This is a first run, setup the profile but don't save it yet.
+            Profile *myProfile = [[Profile alloc] initCurrentUserProfileInDatabase:self.database withName:userData[@"name"] andUserID:userID];
+            
+            // Now tag all all lists created before the user logged in,
+            // with the userID.
+            
+            [List updateAllListsInDatabase:self.database withOwner:myProfile error:outError];
+            
+            // Sync doesn't start until after this block completes, so
+            // all this data will be tagged.
+            if (!outError) {
+                [myProfile save:outError];
+            }
+        }];
+    }
+}
+
+
 
 @end

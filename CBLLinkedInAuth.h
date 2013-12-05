@@ -7,7 +7,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <CouchbaseLite/CouchbaseLite.h>
+#import "CBLSyncManager.h"
 
-@interface CBLLinkedInAuth : NSObject
+@interface CBLLinkedInAuth : NSObject<CBLSyncAuthenticator>
 
 @end

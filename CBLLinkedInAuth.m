@@ -9,5 +9,21 @@
 #import "CBLLinkedInAuth.h"
 
 @implementation CBLLinkedInAuth
+@synthesize syncManager=_syncManager;
 
+- (instancetype) initWithAppID:(NSString *)appID {
+    self = [super init];
+    if (self) {
+        _facebookAppID = appID;
+    }
+    return self;
+}
+
+- (void) getCredentials:(void (^)(NSString * userID, NSDictionary * userData))block {
+    
+}
+- (void)registerCredentialsWithReplications:(NSArray *)repls {
+    
+}
 @end
+

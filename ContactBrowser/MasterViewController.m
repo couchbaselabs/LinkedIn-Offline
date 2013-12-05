@@ -12,9 +12,7 @@
 #import "LIALinkedInApplication.h"
 #import "LIALinkedInHttpClient.h"
 #import <CouchbaseLite/CouchbaseLite.h>
-
-
-#define kAuthAgentServer @"http://10.0.1.12:8080"
+#import "AppSecretConfig.h"
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
@@ -42,13 +40,16 @@
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
     
+    
+    
+    
+    
+    
     NSArray *grantedAccess = @[@"r_fullprofile", @"r_network", @"w_messages", @"r_emailaddress"];
     
     //load the the secret data from an uncommitted LIALinkedInClientExampleCredentials.h file
-    NSString *clientId = @"75pagpxz73rdcs"; //the client secret you get from the registered LinkedIn application
-    NSString *clientSecret = @"krsIJQtDU5cAZMO4"; //the client secret you get from the registered LinkedIn application
-    NSString *state = @"entropy8please34876tfgkshd7qieufg28734ythanks"; //A long unique string value of your choice that is hard to guess. Used to prevent CSRF
-    LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:@"http://mobile.couchbase.com" clientId:clientId clientSecret:clientSecret state:state grantedAccess:grantedAccess];
+
+    LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:kLIRedirectURL clientId:kLIClientID clientSecret:kLIClientSecret state:kLIClientNonce grantedAccess:grantedAccess];
     _client = [LIALinkedInHttpClient clientForApplication:application];
     
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonSystemItemRefresh target:self action:@selector(didPressLogin:)];
