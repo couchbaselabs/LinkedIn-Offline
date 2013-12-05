@@ -12,8 +12,7 @@
 #import "LIALinkedInApplication.h"
 #import "LIALinkedInHttpClient.h"
 
-#define kAuthAgentServer @"https://www.linkedin.com"
-
+#define kAuthAgentServer @"http://10.0.1.12:8080"
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
@@ -62,9 +61,8 @@
 
 - (void)sendAccessTokenToAuthenticationAgent: (NSString *)accessToken {
     LIALinkedInHttpClient *authAgentClient = [[LIALinkedInHttpClient alloc] initWithBaseURL:[NSURL URLWithString:kAuthAgentServer]];
-    [authAgentClient postPath:@"/access_token" parameters:@{@"access_token":accessToken} success:^(AFHTTPRequestOperation *operation, NSDictionary *userData) {
-        NSLog(@"Got userData %@ with accessToken %@", userData, error);
-//        success(userData);
+    [authAgentClient getPath:[@"/_access_token/" stringByAppendingString:accessToken] parameters:nil  success:^(AFHTTPRequestOperation *operation, NSDictionary *userData) {
+        NSLog(@"Got userData %@ with accessToken %@", userData, accessToken);
     }     failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Setting new accessToken failed %@", error);
     }];

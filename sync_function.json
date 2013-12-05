@@ -1,0 +1,21 @@
+{
+	"log": ["REST+"],
+	"databases": {
+		"linkedin": {
+			"server": "walrus:",
+			"users": {
+				"GUEST": {"disabled": true },
+        "daemon" : {
+          "password" : "secret",
+          "admin_channels" : ["users"]
+        }
+			},
+      "sync": `
+function(doc){
+  if (doc.type == "user" && doc.state == "new") {
+    channel("new-users")
+  }
+}`
+		}
+	}
+}
