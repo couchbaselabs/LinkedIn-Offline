@@ -1,22 +1,5 @@
-var requestLib = require("request"),
-  request = requestLib.defaults({
-  json:true
-}, function(uri, options, callback){
-  var params = requestLib.initParams(uri, options, callback);
-  // params.options.body = JSON.stringify(params.options.body)
-  console.log("req body", params.options)
-  return requestLib(params.uri, params.options, function(err, res, body){
-    // treat bad status codes as errors
-    console.log("requestLib", err, res.statusCode, params.uri)
-    if (!err && res.statusCode >= 400) {
-      console.log("status error", res.statusCode, params.uri)
-      params.callback.apply(this, [res.statusCode, res, body]);
-    } else {
-      params.callback.apply(this, arguments);
-    }
-  })
-}),
-httpProxy = require('http-proxy');
+var request = require("./json-client"),
+  httpProxy = require('http-proxy');
 
 var syncGatewayInfo = {
       host: 'localhost',
@@ -100,7 +83,6 @@ function doApplicationSetup(userID, accessToken, done){
       console.log("existing setupDoc", setupDoc);
       if (setupDoc.accessToken !== accessToken) {
         setupDoc.accessToken = accessToken;
-        setupDoc.state = "new";
         request.put(userSetupDocURL, {json:setupDoc}, done);
       } else {
         done()

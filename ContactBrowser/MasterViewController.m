@@ -59,10 +59,17 @@
     // Dispose of any resources that can be recreated.
 }
 
+#pragma mark - Linked-In Login
+
 - (void)sendAccessTokenToAuthenticationAgent: (NSString *)accessToken {
     LIALinkedInHttpClient *authAgentClient = [[LIALinkedInHttpClient alloc] initWithBaseURL:[NSURL URLWithString:kAuthAgentServer]];
     [authAgentClient getPath:[@"/_access_token/" stringByAppendingString:accessToken] parameters:nil  success:^(AFHTTPRequestOperation *operation, NSDictionary *userData) {
         NSLog(@"Got userData %@ with accessToken %@", userData, accessToken);
+        
+//        now we are ready to sync...
+        
+        
+        
     }     failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"Setting new accessToken failed %@", error);
     }];
