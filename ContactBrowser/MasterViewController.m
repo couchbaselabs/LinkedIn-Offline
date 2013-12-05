@@ -11,6 +11,8 @@
 #import "DetailViewController.h"
 #import "LIALinkedInApplication.h"
 #import "LIALinkedInHttpClient.h"
+#import <CouchbaseLite/CouchbaseLite.h>
+
 
 #define kAuthAgentServer @"http://10.0.1.12:8080"
 

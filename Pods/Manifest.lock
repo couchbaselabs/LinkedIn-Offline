@@ -1,13 +1,16 @@
 PODS:
   - AFNetworking (1.2.1)
+  - couchbase-lite-ios (1.0-beta)
   - IOSLinkedInAPI (1.0.0):
     - AFNetworking (~> 1.2.1)
 
 DEPENDENCIES:
+  - couchbase-lite-ios (~> 1.0-beta)
   - IOSLinkedInAPI (~> 1.0.0)
 
 SPEC CHECKSUMS:
   AFNetworking: a44069e3c9c89867544f6639482f155c7e5f9b41
+  couchbase-lite-ios: 88b4ccf765303f4369952b33b5c4c5f73215be3c
   IOSLinkedInAPI: 06351da441c7c73d9cab64d9c3de8c3c34e5f973
 
 COCOAPODS: 0.28.0
