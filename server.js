@@ -106,7 +106,7 @@ function getSessionForUser(userID, done) {
 
 function ensureUserDocExists(userID, done) {
   var userDocURL = adminURL+"/"+syncGatewayInfo.dbname+"/_user/" + userID;
-  request.get(userDocURL, function(err, res, body) {
+  request.get(userDocURL, function(err, res) {
     console.log("userDocURL", err, res.statusCode, userDocURL)
     if (err == 404) {
       // create a user doc

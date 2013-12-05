@@ -54,10 +54,10 @@ function grantAccessToContacts(userID, contactIDs, done) {
     var chans = {};
     for (var i = 0; i < body.admin_channels.length; i++) {
       chans[body.admin_channels[i]] = true;
-    };
-    for (var i = 0; i < contactIDs.length; i++) {
+    }
+    for (i = 0; i < contactIDs.length; i++) {
       if (contactIDs[i] != "private") chans[contactIDs[i]] = true;
-    };
+    }
     body.admin_channels = Object.keys(chans);
     console.log("grantAccessToContacts", contactIDs, body)
     request.put(adminDb+"/_user/"+userID, {json : body}, done)
@@ -106,3 +106,4 @@ feed.on('error', function(err) {
 })
 
 feed.follow();
+
