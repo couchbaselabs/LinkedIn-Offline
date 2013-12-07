@@ -10,9 +10,11 @@
 #import "MasterViewController.h"
 #import "DetailViewController.h"
 
+#import <UIKit/UIKit.h>
 #import <CouchbaseLite/CouchbaseLite.h>
 #import "AppSecretConfig.h"
 #import "Contact.h"
+#import "Company.h"
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
@@ -42,11 +44,21 @@
     
     app = [[UIApplication sharedApplication] delegate];
     NSAssert(_dataSource, @"_dataSource not connected");
-    _dataSource.query = [Contact queryContactsInDatabase: app.database].asLiveQuery;
+    
+//    swap out the query based on which pane is selected
+    
+    _dataSource.query = [Company queryCompaniesInDatabase: app.database].asLiveQuery;
+//    _dataSource.query = [Contact queryContactsInDatabase: app.database].asLiveQuery;
     _dataSource.labelProperty = @"name";    // Document property to display in the cell label
     if (!app.cblSync.userID) {
         self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonSystemItemRefresh target:self action:@selector(didPressLogin:)];
     }
+    
+    
+    UISegmentedControl *switchLists = [[UISegmentedControl alloc] initWithItems:[NSArray arrayWithObjects:@"Contacts", @"Companies", nil]];
+    [switchLists sizeToFit];
+    switchLists.selectedSegmentIndex = 0;
+    self.navigationItem.titleView = switchLists;
 }
 
 - (void)didReceiveMemoryWarning
@@ -125,13 +137,12 @@
              willUseCell:(UITableViewCell*)cell
                   forRow:(CBLQueryRow*)row
 {
-     Contact* contact = [Contact modelForDocument: row.document];
+    Contact* contact = [Contact modelForDocument: row.document];
     if (contact.avatar) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
     } else {
         cell.accessoryType = UITableViewCellAccessoryNone;
     }
-    
 }
 //todo call this from the table view
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

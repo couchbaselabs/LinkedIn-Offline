@@ -11,14 +11,14 @@ var adminDb = "http://localhost:4985/linkedin";
 // var linkedInUserProfileUrl = "/v1/people/~:(id,email-address,first-name,last-name,headline,current-share,summary,picture-url,public-profile-url,specialties,positions)?format=json&oauth2_access_token="+accessToken;
 
 
-var feed = new follow.Feed({db:adminDb, include_docs:true, filter : "sync_gateway/bychannel", query_params : {channels : "user-new,contact-new,message-new"}});
+var feed = new follow.Feed({db:adminDb, include_docs:true, filter : "sync_gateway/bychannel", query_params : {channels : "user-new,contact-new,message-new,company-new"}});
 
 // handle new users
 docstate.safe("user", "new", function(doc){
   console.log("new user", doc)
   var userID = doc._id.substr(2);
   // fetch the users contacts
-  var connectionsURL = "https://api.linkedin.com/v1/people/~/connections?format=json&oauth2_access_token="+doc.accessToken
+  var connectionsURL = "https://api.linkedin.com/v1/people/~/connections:(id,email-address,first-name,last-name,headline,location,picture-url,positions)?format=json&oauth2_access_token="+doc.accessToken
   request.get(connectionsURL, function(err, res, body){
     if (err) {
       console.error("error with user", doc._id, err)
@@ -50,10 +50,24 @@ docstate.safe("user", "new", function(doc){
 })
 
 // fetch avatar images for contacts
-var avatarFetch = async.queue(function(doc, done) {
+var avatarFetch = async.queue(function(info, done) {
+  var doc = info.doc;
+  var field = info.field;
   var docURL= adminDb+"/"+doc._id;
   console.log("fetch avatar for", docURL)
-  var getPic = rawRequest(doc.pictureUrl)
+  var picURL = doc[field];
+  if (!picURL) {
+    delete doc.state;
+    return request.put(docURL, {json:doc}, function(err) {
+      if (err) {
+        console.error("doc put error", err, doc);
+        throw(err)
+      }
+      done()
+    })
+  }
+
+  var getPic = rawRequest(picURL)
   getPic.on("error", function(err) {
     throw err;
   })
@@ -63,23 +77,41 @@ var avatarFetch = async.queue(function(doc, done) {
       image = Buffer.concat([image, data]);
     })
     res.on("end", function() {
-      doc._attachments = {
-        avatar : {
-          data : image.toString("base64"),
-          content_type : res.headers["content-type"]
-        }
+      doc._attachments = {};
+      doc._attachments[info.target] = {
+        data : image.toString("base64"),
+        content_type : res.headers["content-type"]
       }
       delete doc.state;
       request.put(docURL, {json:doc}, function(err) {
         if (err) {
-          console.error("contact put error", err, doc);
+          console.error("attach put error", err, doc);
           throw(err)
         }
         done()
       })
     })
   })
-}, 8)
+}, 4)
+
+var companyFetch = async.queue(function(info, done) {
+
+  var companyInfoURL = "https://api.linkedin.com/v1/companies/"+info.id+":(id,name,square-logo-url,description)?format=json&oauth2_access_token="+info.accessToken
+  request.get(companyInfoURL, function(err, res, body) {
+    if (err) {
+      console.error("err company", err, body)
+    } else {
+      console.log("company", body)
+      body.type = "company";
+      body.state = 'new';
+      var companyURL = adminDb + "/com:" + body.id
+      request.put(companyURL, {json: body}, function(err, res, body){
+        done()
+      })
+    }
+  })
+
+}, 4)
 
 
 docstate.safe("contact", "new", function(doc){
@@ -93,9 +125,17 @@ docstate.safe("contact", "new", function(doc){
       }
     })
   } else {
-    avatarFetch.push(doc);
+    avatarFetch.push({doc:doc, field : "pictureUrl", target : "avatar"});
   }
 });
+
+
+docstate.safe("company", "new", function(doc){
+  console.log("company", doc);
+  avatarFetch.push({doc:doc, field : "squareLogoUrl", target : "logo"});
+})
+
+
 
 function grantAccessToContacts(userID, contactIDs, done) {
   request.get(adminDb+"/_user/"+userID, function(err, res, body) {
@@ -110,6 +150,7 @@ function grantAccessToContacts(userID, contactIDs, done) {
     }
     body.admin_channels = Object.keys(chans);
     // console.log("grantAccessToContacts", contactIDs, body)
+    body.admin_channels.push("all")
     request.put(adminDb+"/_user/"+userID, {json : body}, done)
   });
 }
@@ -121,6 +162,12 @@ function insertProfiles(user, profiles, done) {
   delete p.apiStandardProfileRequest;
   p.type = "contact"
   p.state = "new"
+
+  var pos = p.positions && p.positions.values && p.positions.values[0]
+  if (pos && pos.company && pos.company.id) {
+    companyFetch.push({id : pos.company.id, accessToken : user.accessToken})
+  }
+
   var docURL= adminDb+"/c:"+p.id;
   request.get(docURL, function(err, res, doc) {
     if (err == 404) {

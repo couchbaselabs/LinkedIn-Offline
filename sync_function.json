@@ -18,6 +18,9 @@ function(doc){
   if (doc.type == "contact") {
     channel("c-"+doc.id);
   }
+  if (doc.type == "company") {
+    channel("all")
+  }
 }`
 		}
 	}
