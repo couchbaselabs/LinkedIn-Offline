@@ -11,7 +11,7 @@ var adminDb = "http://localhost:4985/linkedin";
 // var linkedInUserProfileUrl = "/v1/people/~:(id,email-address,first-name,last-name,headline,current-share,summary,picture-url,public-profile-url,specialties,positions)?format=json&oauth2_access_token="+accessToken;
 
 
-var feed = new follow.Feed({db:adminDb, include_docs:true, filter : "sync_gateway/bychannel", query_params : {channels : "user-new,contact-new"}});
+var feed = new follow.Feed({db:adminDb, include_docs:true, filter : "sync_gateway/bychannel", query_params : {channels : "user-new,contact-new,message-new"}});
 
 // handle new users
 docstate.safe("user", "new", function(doc){
@@ -140,9 +140,38 @@ function insertProfiles(user, profiles, done) {
 }
 
 
-// handle new companies
-docstate.safe("company", "new", function(doc){
-  console.log("new company", doc)
+// handle new messages
+docstate.safe("message", "new", function(doc){
+  console.log("new message", doc)
+  var userURL= adminDb+"/u:"+doc.sender_id;
+  request.get(userURL, function(err, res, sender) {
+    var sendURL = "https://api.linkedin.com/v1/people/~/mailbox?format=json&oauth2_access_token="+sender.accessToken
+    var sendBody = {
+      recipients: {
+        values : [{
+          person : {
+            _path : "/people/"+doc.recipient.substr(2)
+          }
+        }]
+      },
+      subject : doc.subject,
+      body : doc.message
+    }
+    request.post(sendURL, {json : sendBody}, function(err, res, body){
+      console.log("sent message", err, body)
+      if (!err) {
+        delete doc.state;
+        request.post(adminDb, {json:doc}, function(err, res, body) {
+          console.log("done message", err, body)
+        })
+      }
+    })
+  });
+// get user doc for access token
+// user access token to send message
+// remove state = new
+
+
 })
 
 docstate.start()

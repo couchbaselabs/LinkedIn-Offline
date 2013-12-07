@@ -6,14 +6,18 @@
 //  Copyright (c) 2013 Chris Anderson. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "DetailViewController.h"
+#import "Message.h"
 
 @interface DetailViewController ()
 @property (strong, nonatomic) UIPopoverController *masterPopoverController;
 - (void)configureView;
 @end
 
-@implementation DetailViewController
+@implementation DetailViewController{
+    AppDelegate *app;
+}
 
 #pragma mark - Managing the detail item
 
@@ -34,10 +38,12 @@
 - (void)configureView
 {
     // Update the user interface for the detail item.
-    if (self.detailItem) {
-        self.detailDescriptionLabel.text = [self.detailItem description];
-        self.avatarView.image = self.detailItem.avatar;
-        self.headlineLabel.text = self.detailItem.headline;
+    Contact *contact = self.detailItem;
+    if (contact) {
+        self.detailDescriptionLabel.text = contact.location;
+        self.avatarView.image = contact.avatar;
+        self.headlineLabel.text = contact.headline;
+        self.navbar.title = [contact description];
     }
 }
 
@@ -45,6 +51,7 @@
 {
     [super viewDidLoad];
 	// Do any additional setup after loading the view, typically from a nib.
+    app = [[UIApplication sharedApplication] delegate];
     [self configureView];
 }
 
@@ -70,4 +77,16 @@
     self.masterPopoverController = nil;
 }
 
+- (IBAction)touchedSend:(id)sender {
+    NSLog(@"send %@",self.messageView.text);
+    Message *message = [[Message alloc] initInDatabase:self.detailItem.database fromSenderID:app.cblSync.userID toRecipient:self.detailItem];
+    message.message = self.messageView.text;
+    message.subject = self.subjectField.text;
+    NSError *e;
+    [message save:&e];
+    if (!e) {
+        self.messageView.text = @"";
+        self.subjectField.text = @"";
+    }
+}
 @end

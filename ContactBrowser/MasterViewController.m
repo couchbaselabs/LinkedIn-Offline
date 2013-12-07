@@ -126,8 +126,12 @@
                   forRow:(CBLQueryRow*)row
 {
      Contact* contact = [Contact modelForDocument: row.document];
-    if (contact.avatar)
+    if (contact.avatar) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    } else {
+        cell.accessoryType = UITableViewCellAccessoryNone;
+    }
+    
 }
 //todo call this from the table view
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

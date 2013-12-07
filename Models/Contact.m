@@ -50,7 +50,11 @@
     }
     return _avatar;
 }
-
+- (NSString*)location {
+    if (self.document.properties[@"location"])
+        return self.document.properties[@"location"][@"name"];
+    return nil;
+}
 
 
 @end

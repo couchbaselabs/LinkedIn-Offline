@@ -26,5 +26,6 @@
 @property (readwrite) NSString* headline;
 
 @property (readonly) UIImage* avatar;
+@property (readonly) NSString* location;
 
 @end

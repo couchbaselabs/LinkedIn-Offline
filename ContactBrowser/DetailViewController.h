@@ -15,6 +15,11 @@
 
 @property (weak, nonatomic) IBOutlet UIImageView *avatarView;
 @property (weak, nonatomic) IBOutlet UILabel *headlineLabel;
+@property (weak, nonatomic) IBOutlet UINavigationItem *navbar;
 
+@property (weak, nonatomic) IBOutlet UITextView *messageView;
+- (IBAction)touchedSend:(id)sender;
+
+@property (weak, nonatomic) IBOutlet UITextField *subjectField;
 @property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
 @end

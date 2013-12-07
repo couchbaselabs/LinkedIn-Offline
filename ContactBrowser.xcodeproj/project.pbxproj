@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		75E5EDD35FFE497DAB32EAEC /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3ABE47141DB441D082F589AB /* libPods.a */; };
+		790CAC651852F2AE0051A37A /* Message.m in Sources */ = {isa = PBXBuildFile; fileRef = 790CAC641852F2AE0051A37A /* Message.m */; };
 		7945BCFB184F91C300F1014A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7945BCFA184F91C300F1014A /* Foundation.framework */; };
 		7945BCFD184F91C300F1014A /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7945BCFC184F91C300F1014A /* CoreGraphics.framework */; };
 		7945BCFF184F91C300F1014A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7945BCFE184F91C300F1014A /* UIKit.framework */; };
@@ -41,6 +42,8 @@
 /* Begin PBXFileReference section */
 		3ABE47141DB441D082F589AB /* libPods.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libPods.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		575E2176CC3E46088FCF16FE /* Pods.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.xcconfig; path = Pods/Pods.xcconfig; sourceTree = "<group>"; };
+		790CAC631852F2AE0051A37A /* Message.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Message.h; path = Models/Message.h; sourceTree = "<group>"; };
+		790CAC641852F2AE0051A37A /* Message.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Message.m; path = Models/Message.m; sourceTree = "<group>"; };
 		7945BCF7184F91C300F1014A /* ContactBrowser.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ContactBrowser.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7945BCFA184F91C300F1014A /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		7945BCFC184F91C300F1014A /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -101,6 +104,8 @@
 			children = (
 				798CF3D518522D890014D86D /* Contact.h */,
 				798CF3D618522D890014D86D /* Contact.m */,
+				790CAC631852F2AE0051A37A /* Message.h */,
+				790CAC641852F2AE0051A37A /* Message.m */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -321,6 +326,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7945BD0B184F91C300F1014A /* AppDelegate.m in Sources */,
+				790CAC651852F2AE0051A37A /* Message.m in Sources */,
 				7945BD371850F9F300F1014A /* CBLLinkedInAuth.m in Sources */,
 				7945BD11184F91C300F1014A /* MasterViewController.m in Sources */,
 				7945BD07184F91C300F1014A /* main.m in Sources */,
