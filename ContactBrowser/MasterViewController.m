@@ -6,21 +6,22 @@
 //  Copyright (c) 2013 Chris Anderson. All rights reserved.
 //
 
+#import "AppDelegate.h"
 #import "MasterViewController.h"
-
 #import "DetailViewController.h"
-#import "LIALinkedInApplication.h"
-#import "LIALinkedInHttpClient.h"
+
 #import <CouchbaseLite/CouchbaseLite.h>
 #import "AppSecretConfig.h"
+#import "Contact.h"
 
 @interface MasterViewController () {
     NSMutableArray *_objects;
-    LIALinkedInHttpClient *_client;
 }
 @end
 
-@implementation MasterViewController
+@implementation MasterViewController{
+    AppDelegate *app;
+}
 
 - (void)awakeFromNib
 {
@@ -39,21 +40,13 @@
 //    self.navigationItem.rightBarButtonItem = addButton;
     self.detailViewController = (DetailViewController *)[[self.splitViewController.viewControllers lastObject] topViewController];
     
-    
-    
-    
-    
-    
-    
-    NSArray *grantedAccess = @[@"r_fullprofile", @"r_network", @"w_messages", @"r_emailaddress"];
-    
-    //load the the secret data from an uncommitted LIALinkedInClientExampleCredentials.h file
-
-    LIALinkedInApplication *application = [LIALinkedInApplication applicationWithRedirectURL:kLIRedirectURL clientId:kLIClientID clientSecret:kLIClientSecret state:kLIClientNonce grantedAccess:grantedAccess];
-    _client = [LIALinkedInHttpClient clientForApplication:application];
-    
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonSystemItemRefresh target:self action:@selector(didPressLogin:)];
-
+    app = [[UIApplication sharedApplication] delegate];
+    NSAssert(_dataSource, @"_dataSource not connected");
+    _dataSource.query = [Contact queryContactsInDatabase: app.database].asLiveQuery;
+    _dataSource.labelProperty = @"name";    // Document property to display in the cell label
+    if (!app.cblSync.userID) {
+        self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Login" style:UIBarButtonSystemItemRefresh target:self action:@selector(didPressLogin:)];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -64,44 +57,10 @@
 
 #pragma mark - Linked-In Login
 
-- (void)sendAccessTokenToAuthenticationAgent: (NSString *)accessToken {
-    LIALinkedInHttpClient *authAgentClient = [[LIALinkedInHttpClient alloc] initWithBaseURL:[NSURL URLWithString:kAuthAgentServer]];
-    [authAgentClient getPath:[@"/_access_token/" stringByAppendingString:accessToken] parameters:nil  success:^(AFHTTPRequestOperation *operation, NSDictionary *userData) {
-        NSLog(@"Got userData %@ with accessToken %@", userData, accessToken);
-        
-//        now we are ready to sync...
-        
-        
-        
-    }     failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-        NSLog(@"Setting new accessToken failed %@", error);
-    }];
-}
-
 - (void)didPressLogin:(id)sender
 {
-    NSLog(@"didPressLogin");
-    
-    [_client getAuthorizationCode:^(NSString *code) {
-        [_client getAccessToken:code success:^(NSDictionary *accessTokenData) {
-            NSString *accessToken = [accessTokenData objectForKey:@"access_token"];
-            
-//            todo use the _client to discover email address can be done on the server
-            [self sendAccessTokenToAuthenticationAgent: accessToken];
-            
-            
-            [_client getPath:[NSString stringWithFormat:@"https://api.linkedin.com/v1/people/~?oauth2_access_token=%@&format=json", accessToken] parameters:nil success:^(AFHTTPRequestOperation *operation, NSDictionary *result) {
-                NSLog(@"current user %@", result);
-            }            failure:^(AFHTTPRequestOperation *operation, NSError *error) {
-                NSLog(@"failed to fetch current user %@", error);
-            }];
-        }                   failure:^(NSError *error) {
-            NSLog(@"Quering accessToken failed %@", error);
-        }];
-    }                          cancel:^{
-        NSLog(@"Authorization was cancelled by user");
-    }                         failure:^(NSError *error) {
-        NSLog(@"Authorization failed %@", error);
+    [app loginAndSync:^{
+        NSLog(@"we are syncing");
     }];
 }
 
@@ -142,26 +101,52 @@
     }
 }
 
-/*
-// Override to support rearranging the table view.
-- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+// Delegate method called when the live-query results change.
+- (void)couchTableSource:(CBLUITableSource*)source
+         updateFromQuery:(CBLLiveQuery*)query
+            previousRows:(NSArray *)previousRows
 {
+    //    NSLog(@"couchTableSource previousRows %@",previousRows);
+    
+    [[self tableView] reloadData];
+    
+    //    if (!_initialLoadComplete) {
+    //        // On initial table load on launch, decide which row/list to select:
+    //        [self selectList: self.initialList];
+    //        _initialLoadComplete = YES;
+    //    }
 }
-*/
 
-/*
-// Override to support conditional rearranging of the table view.
-- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+
+#pragma mark - Table View
+
+// Delegate method to set up a new table cell
+- (void)couchTableSource:(CBLUITableSource*)source
+             willUseCell:(UITableViewCell*)cell
+                  forRow:(CBLQueryRow*)row
 {
-    // Return NO if you do not want the item to be re-orderable.
-    return YES;
+     Contact* contact = [Contact modelForDocument: row.document];
+    if (contact.avatar)
+        cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
 }
-*/
-
+//todo call this from the table view
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    NSDate *object = _objects[indexPath.row];
-    self.detailViewController.detailItem = object;
+    NSLog(@"didSelectRowAtIndexPath");
+    
+    if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad) {
+        //        NSDate *object = _objects[indexPath.row];
+        CBLQueryRow *row = [self.dataSource rowAtIndex:indexPath.row];
+        Contact* contact = [Contact modelForDocument: row.document];
+        self.detailViewController.detailItem = contact;
+        NSLog(@"didSelectRowAtIndexPath contact %@",contact.description);
+        
+        
+        //        [self showList: list];
+        
+    } else {
+        [self performSegueWithIdentifier:@"showDetail" sender:self];
+    }
 }
 
 @end

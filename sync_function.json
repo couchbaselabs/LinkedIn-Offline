@@ -12,11 +12,11 @@
 			},
       "sync": `
 function(doc){
-  if (doc.type == "user" && doc.state == "new") {
-    channel("new-users")
+  if (doc.type && doc.state) {
+    channel(doc.type+"-"+doc.state)
   }
-  if (doc.type == "profile") {
-    channel("p-"+doc.id);
+  if (doc.type == "contact") {
+    channel("c-"+doc.id);
   }
 }`
 		}

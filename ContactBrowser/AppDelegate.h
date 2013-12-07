@@ -8,7 +8,6 @@
 
 #import <UIKit/UIKit.h>
 #import <CouchbaseLite/CouchbaseLite.h>
-#import "CBLSyncManager.h"
 #import "CBLLinkedInAuth.h"
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>

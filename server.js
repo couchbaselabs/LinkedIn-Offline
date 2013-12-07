@@ -23,7 +23,7 @@ httpProxy.createServer(function (req, res, proxy) {
   // Put your custom server logic here
   //
   if (/_access_token\/.*/.test(req.url)) {
-
+    console.log("token",req.method, req.url, req.headers)
     handleAccessToken(req.url.split('/').pop(), function(err, userID, session){
       if (err) {
         console.log("error", err)
@@ -33,12 +33,13 @@ httpProxy.createServer(function (req, res, proxy) {
         console.log("session info", session)
         res.writeHead(200, {
           'Content-Type': 'application/json',
-          "Set-Cookie" : [session.cookie_name+"="+session.session_id]
+          "Set-Cookie" : session.cookie_name+"="+session.session_id+"; Path=/; Expires="+(new Date(session.expires)).toUTCString()
         });
         res.end(JSON.stringify({userID: userID}));
       }
     })
   } else {
+    console.log("proxy",req.method, req.url, req.headers)
     proxy.proxyRequest(req, res, syncGatewayInfo);
   }
 
@@ -68,7 +69,7 @@ function handleAccessToken(accessToken, done) {
 function doApplicationSetup(userID, accessToken, done){
   var userSetupDocURL = adminURL+"/"+syncGatewayInfo.dbname+"/u:" + userID;
   request.get(userSetupDocURL, function(err, res, setupDoc) {
-    console.log("get doc", err, res.statusCode, setupDoc._id)
+    // console.log("get doc", err, res.statusCode, setupDoc._id)
 
     if (err == 404) {
       var newSetupDoc = {
@@ -80,7 +81,7 @@ function doApplicationSetup(userID, accessToken, done){
     } else if (err) {
       done(err)
     } else {
-      console.log("existing setupDoc", setupDoc);
+      // console.log("existing setupDoc", setupDoc);
       if (setupDoc.accessToken !== accessToken) {
         setupDoc.accessToken = accessToken;
         request.put(userSetupDocURL, {json:setupDoc}, done);
@@ -96,7 +97,7 @@ function getSessionForUser(userID, done) {
   ensureUserDocExists(userID, function(err) {
     if (err) {return done(err)}
     request.post(adminURL+"/"+syncGatewayInfo.dbname+"/_session", {json:{name : userID}}, function(err, res, body){
-      console.log("session", err, res.statusCode, body)
+      // console.log("session", err, res.statusCode, body)
       if (err) {return done(err)}
       done(false, body)
     })
@@ -107,11 +108,11 @@ function getSessionForUser(userID, done) {
 function ensureUserDocExists(userID, done) {
   var userDocURL = adminURL+"/"+syncGatewayInfo.dbname+"/_user/" + userID;
   request.get(userDocURL, function(err, res) {
-    console.log("userDocURL", err, res.statusCode, userDocURL)
+    // console.log("userDocURL", err, res.statusCode, userDocURL)
     if (err == 404) {
       // create a user doc
       request.put(userDocURL, {json:{email: userID, password : Math.random().toString(36).substr(2)}}, function(err, res, body){
-        console.log("put userDocURL", err, res.statusCode, body)
+        // console.log("put userDocURL", err, res.statusCode, body)
         done(err)
       })
     } else {

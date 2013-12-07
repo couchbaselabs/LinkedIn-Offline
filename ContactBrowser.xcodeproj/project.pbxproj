@@ -25,6 +25,7 @@
 		7945BD29184F91C300F1014A /* ContactBrowserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 7945BD28184F91C300F1014A /* ContactBrowserTests.m */; };
 		7945BD341850F83500F1014A /* CBLSyncManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 7945BD331850F83500F1014A /* CBLSyncManager.m */; };
 		7945BD371850F9F300F1014A /* CBLLinkedInAuth.m in Sources */ = {isa = PBXBuildFile; fileRef = 7945BD361850F9F300F1014A /* CBLLinkedInAuth.m */; };
+		798CF3D718522D890014D86D /* Contact.m in Sources */ = {isa = PBXBuildFile; fileRef = 798CF3D618522D890014D86D /* Contact.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +67,8 @@
 		7945BD351850F9F300F1014A /* CBLLinkedInAuth.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CBLLinkedInAuth.h; sourceTree = SOURCE_ROOT; };
 		7945BD361850F9F300F1014A /* CBLLinkedInAuth.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CBLLinkedInAuth.m; sourceTree = SOURCE_ROOT; };
 		7945BD381851066C00F1014A /* AppSecretConfig.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppSecretConfig.h; sourceTree = "<group>"; };
+		798CF3D518522D890014D86D /* Contact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Contact.h; path = Models/Contact.h; sourceTree = SOURCE_ROOT; };
+		798CF3D618522D890014D86D /* Contact.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Contact.m; path = Models/Contact.m; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -93,9 +96,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		790CAC6218527E880051A37A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				798CF3D518522D890014D86D /* Contact.h */,
+				798CF3D618522D890014D86D /* Contact.m */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
 		7945BCEE184F91C300F1014A = {
 			isa = PBXGroup;
 			children = (
+				790CAC6218527E880051A37A /* Models */,
 				7945BD00184F91C300F1014A /* ContactBrowser */,
 				7945BD22184F91C300F1014A /* ContactBrowserTests */,
 				7945BCF9184F91C300F1014A /* Frameworks */,
@@ -311,6 +324,7 @@
 				7945BD371850F9F300F1014A /* CBLLinkedInAuth.m in Sources */,
 				7945BD11184F91C300F1014A /* MasterViewController.m in Sources */,
 				7945BD07184F91C300F1014A /* main.m in Sources */,
+				798CF3D718522D890014D86D /* Contact.m in Sources */,
 				7945BD14184F91C300F1014A /* DetailViewController.m in Sources */,
 				7945BD341850F83500F1014A /* CBLSyncManager.m in Sources */,
 			);

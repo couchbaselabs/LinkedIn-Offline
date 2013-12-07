@@ -12,4 +12,8 @@
 
 @interface CBLLinkedInAuth : NSObject<CBLSyncAuthenticator>
 
+- (instancetype) initWithClientID:(NSString *)cID clientSecret:(NSString * )secret redirectURL:(NSString*)url;
+
+
+- (instancetype) initWithClientID:(NSString *)cID clientSecret:(NSString * )secret redirectURL:(NSString*)url grantedAccess: (NSArray *)access;
 @end

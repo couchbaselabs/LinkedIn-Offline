@@ -18,7 +18,5 @@
 #define kLIClientID @"75pagpxz73rdcs"
 //the client secret you get from the registered LinkedIn application
 #define kLIClientSecret @"krsIJQtDU5cAZMO4"
-//A long unique string value of your choice that is hard to guess. Used to prevent CSRF
-#define kLIClientNonce @"changeme34876tfgkshd7qieufg28734ythanks"
 
 #endif

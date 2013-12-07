@@ -110,6 +110,18 @@ static dispatch_queue_t json_request_operation_processing_queue() {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-retain-cycles"
     self.completionBlock = ^ {
+        NSLog(@"AF JSON completionBlock");
+        // Add headers.
+        NSLog(@"will use cookie jar %hhd", [self.request HTTPShouldHandleCookies]);
+        
+        // log cookie headers from the NSHTTPCookieStorage:
+        NSArray* cookies = [[NSHTTPCookieStorage sharedHTTPCookieStorage] cookiesForURL: self.request.URL];
+        NSLog(@"NSHTTPCookieStorage cookiesForURL %@ %@", self.request.URL, cookies);
+        NSDictionary* cookieHeaders = [NSHTTPCookie requestHeaderFieldsWithCookies: cookies];
+        for (NSString* headerName in cookieHeaders) {
+            NSLog(@"cookie %@=%@", headerName, cookieHeaders[headerName]);
+        }
+
         if (self.error) {
             if (failure) {
                 dispatch_async(self.failureCallbackQueue ?: dispatch_get_main_queue(), ^{

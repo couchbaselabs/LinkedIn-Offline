@@ -55,7 +55,6 @@
             [self launchSync];
         }];
     } else {
-        NSLog(@"have userID %@", _userID);
         [self launchSync];
     }
 }
@@ -153,7 +152,6 @@
         [_authenticator getCredentials:^(NSString *newUserID, NSDictionary *userData) {
 //            todo this should call our onSyncAuthError callback
             NSAssert2([newUserID isEqualToString:_userID], @"can't change userID from %@ to %@, need to reinstall", _userID,  newUserID);
-            [self restartSync];
         }];
     }
     
@@ -173,17 +171,8 @@
     }
 }
 
-
-- (void)restartSync {
-    NSLog(@"restartSync");
-    [pull stop];
-    [pull start];
-    [push stop];
-    [push start];
-}
-
-
 - (void)startSync {
+    //    todo listen for sync errors
     NSLog(@"startSync");
     [pull start];
     [push start];
@@ -194,7 +183,6 @@
 - (void) setupNewUser:(void (^)())complete {
     if (_userID) return;
     [_authenticator getCredentials: ^(NSString *userID, NSDictionary *userData){
-        NSLog(@"got userID %@", userID);
         if (_userID) return;
         // Give the app a chance to tag documents with userID before sync starts
         NSError *error = [self runBeforeSyncStartWithUserID: userID andUserData: userData];

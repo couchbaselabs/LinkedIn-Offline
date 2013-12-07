@@ -7,10 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "Contact.h"
 
 @interface DetailViewController : UIViewController <UISplitViewControllerDelegate>
 
-@property (strong, nonatomic) id detailItem;
+@property (strong, nonatomic) Contact *detailItem;
+
+@property (weak, nonatomic) IBOutlet UIImageView *avatarView;
+@property (weak, nonatomic) IBOutlet UILabel *headlineLabel;
 
 @property (weak, nonatomic) IBOutlet UILabel *detailDescriptionLabel;
 @end

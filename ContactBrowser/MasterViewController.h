@@ -7,11 +7,14 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <Couchbaselite/CBLUITableSource.h>
 
 @class DetailViewController;
 
 @interface MasterViewController : UITableViewController
 
 @property (strong, nonatomic) DetailViewController *detailViewController;
+@property (nonatomic) IBOutlet CBLUITableSource* dataSource;
+@property (strong, nonatomic) IBOutlet UITableView *tableView;
 
 @end

@@ -21,7 +21,6 @@
     
     [self setupCBL];
     [self setupCBLSync];
-
     
     return YES;
 }
@@ -82,10 +81,12 @@
 }
 
 - (void) setupCBLSync {
-    _cblSync = [[CBLSyncManager alloc] initSyncForDatabase:_database withURL:[NSURL URLWithString:kSyncUrl]];
+    NSURL *syncURL = [NSURL URLWithString:kSyncRemoteDB relativeToURL:[NSURL URLWithString:kSyncRemoteServer]];
+    
+    _cblSync = [[CBLSyncManager alloc] initSyncForDatabase:_database withURL:syncURL];
     
     // Tell the Sync Manager to use Facebook for login.
-    _cblSync.authenticator = [[CBLLinkedInAuth alloc] initWithAppID:kFBAppId];
+    _cblSync.authenticator = [[CBLLinkedInAuth alloc] initWithClientID:kLIClientID clientSecret:kLIClientSecret redirectURL:kLIRedirectURL];
     
     if (_cblSync.userID) {
         //        we are logged in, go ahead and sync
@@ -95,18 +96,7 @@
         // this will be triggered after we call [_cblSync start]
         [_cblSync beforeFirstSync:^(NSString *userID, NSDictionary *userData,  NSError **outError) {
             // This is a first run, setup the profile but don't save it yet.
-            Profile *myProfile = [[Profile alloc] initCurrentUserProfileInDatabase:self.database withName:userData[@"name"] andUserID:userID];
-            
-            // Now tag all all lists created before the user logged in,
-            // with the userID.
-            
-            [List updateAllListsInDatabase:self.database withOwner:myProfile error:outError];
-            
-            // Sync doesn't start until after this block completes, so
-            // all this data will be tagged.
-            if (!outError) {
-                [myProfile save:outError];
-            }
+            NSLog(@"about to sync");
         }];
     }
 }
