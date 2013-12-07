@@ -161,7 +161,7 @@ docstate.safe("message", "new", function(doc){
       console.log("sent message", err, body)
       if (!err) {
         delete doc.state;
-        request.post(adminDb, {json:doc}, function(err, res, body) {
+        request.put(adminDb+"/"+doc._id, {json:doc}, function(err, res, body) {
           console.log("done message", err, body)
         })
       }
